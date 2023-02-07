@@ -1,0 +1,34 @@
+The canary is 0x555555 and it is not being checked.
+
+(gdb) p system
+$1 = {<text variable, no debug info>} 0xf7e3f950 <system>
+(gdb) p exit
+$2 = {<text variable, no debug info>} 0xf7e337c0 <exit>
+(gdb)
+
+
+./lab1_2 AAAAAAAA
+break at get_name
+diassemble
+break at *get_name+44 (after strcpy)
+
+(gdb) i r esp
+esp            0xffffcfd0	0xffffcfd0
+(gdb) i r ebp
+ebp            0xffffcff8	0xffffcff8
+(gdb) bt
+#0  get_name (input=0xffffd2bd "AAAAAAAA") at lab1.c:12
+#1  0x080484f7 in main (argc=2, argv=0xffffd0c4) at lab1.c:26
+(gdb) 
+
+
+(gdb) x/64x $esp
+...
+
+Find the 0x41414141 pattern (input string)
+=> 0xcfdb
+Find the 0x55555555 pattern (apparent canary)
+=> 0xcfeb
+Find the 0x080484f7 (return address of main)
+=> 0xcffb
+We need to change the return address of main to the address of p exit, then provide the args to exit properly
