@@ -57,6 +57,11 @@ TODO:
   - Put the requried string - 0xcfe4
 
 
+Can also get it from the env var SHELL, the libc, or the overflown buffer, or the argv variable
+
+
+
+
 
 stepi: Step one instruction exactly.
 
