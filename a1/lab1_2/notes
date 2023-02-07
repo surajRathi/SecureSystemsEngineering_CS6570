@@ -6,6 +6,8 @@ $1 = {<text variable, no debug info>} 0xf7e3f950 <system>
 $2 = {<text variable, no debug info>} 0xf7e337c0 <exit>
 (gdb)
 
+`0x08048480 <+21>:	call   0x8048340 <system@plt>`
+What is system@plt and how is it different from system? Can/Should we use that address?
 
 ./lab1_2 AAAAAAAA
 break at get_name
@@ -26,9 +28,63 @@ ebp            0xffffcff8	0xffffcff8
 ...
 
 Find the 0x41414141 pattern (input string)
-=> 0xcfdb
+=> 0xffffcfbc
+=> 0xffffcfdc
 Find the 0x55555555 pattern (apparent canary)
-=> 0xcfeb
+=> 0xffffcfcc
+=> 0xffffcfec
 Find the 0x080484f7 (return address of main)
-=> 0xcffb
+=> 0xffffcfdc
+=> 0xffffcffc
 We need to change the return address of main to the address of p exit, then provide the args to exit properly
+
+
+Next, need to figure out the way arguments are passed to the system() call,
+i.e when the system function is called, find out where on the stack or regisrter the address of the "/bin/ls" is stored.
+
+break *get_name+21 [the call to system]
+=> esp->ebp is 0xcfa0 -> 0xcfd8
+
+
+Now we can add store the required string '/bin/sh' anywhere in memory. We can either send the string in as an env variable or store it in the overflowed buffer.
+Note, as the end of the string needs to be \0, the string needs to be at the end of our overflowed buffer.
+
+TODO:
+  - Address of the req string - 
+  - Filler / canary / filler
+  - Put the address of system on the stack - 0xcfdc
+  - Put the address of exit on the stack - 0xcfe0
+  - Put the requried string - 0xcfe4
+
+
+
+stepi: Step one instruction exactly.
+
+nexti: Step one instruction, but proceed through subroutine calls.
+
+
+
+(gdb) info proc map
+process 2638
+Mapped address spaces:
+
+	Start Addr   End Addr       Size     Offset objfile
+	 0x8048000  0x8049000     0x1000        0x0 /home/esctf/sse/assis/a1/lab1_2/lab1_2
+	 0x8049000  0x804a000     0x1000        0x0 /home/esctf/sse/assis/a1/lab1_2/lab1_2
+	 0x804a000  0x804b000     0x1000     0x1000 /home/esctf/sse/assis/a1/lab1_2/lab1_2
+	0xf7e04000 0xf7e05000     0x1000        0x0 
+	0xf7e05000 0xf7fb2000   0x1ad000        0x0 /lib32/libc-2.23.so
+	0xf7fb2000 0xf7fb3000     0x1000   0x1ad000 /lib32/libc-2.23.so
+	0xf7fb3000 0xf7fb5000     0x2000   0x1ad000 /lib32/libc-2.23.so
+	0xf7fb5000 0xf7fb6000     0x1000   0x1af000 /lib32/libc-2.23.so
+	0xf7fb6000 0xf7fb9000     0x3000        0x0 
+	0xf7fd3000 0xf7fd4000     0x1000        0x0 
+	0xf7fd4000 0xf7fd7000     0x3000        0x0 [vvar]
+	0xf7fd7000 0xf7fd9000     0x2000        0x0 [vdso]
+	0xf7fd9000 0xf7ffc000    0x23000        0x0 /lib32/ld-2.23.so
+	0xf7ffc000 0xf7ffd000     0x1000    0x22000 /lib32/ld-2.23.so
+	0xf7ffd000 0xf7ffe000     0x1000    0x23000 /lib32/ld-2.23.so
+	0xfffdd000 0xffffe000    0x21000        0x0 [stack]
+(gdb) 
+
+
