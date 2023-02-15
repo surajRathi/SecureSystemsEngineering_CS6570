@@ -92,7 +92,8 @@ Mapped address spaces:
 	0xfffdd000 0xffffe000    0x21000        0x0 [stack]
 (gdb) 
 
-esctf@osboxes:~/sse/assis/a1/lab1_2$ strings -a -t x /lib32/libc-2.23.so | grep "/bin/sh" 15912b /bin/sh
+esctf@osboxes:~/sse/assis/a1/lab1_2$ strings -a -t x /lib32/libc-2.23.so | grep "/bin/sh" 
+15912b /bin/sh
 
 
 (gdb) x/s 0xf7e05000 + 0x15912b
