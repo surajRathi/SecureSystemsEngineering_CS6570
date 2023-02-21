@@ -166,3 +166,21 @@ Need to write 24 bytes then the return address and set i to be 9
 First: Try to set the value of i to 9
 Then: Overflow the stack to overwrite the return address
 Final: Do the actual ROP stuff.
+
+
+gef➤  p exit
+$1 = {<text variable, no debug info>} 0x80507f0 <exit>
+gef➤  
+
+
+ 
+break *concatenate_first_chars+183
+run < a
+x/16xw $esp
+
+break *concatenate_first_chars+183
+run < a
+x/16xw $esp
+
+
+

