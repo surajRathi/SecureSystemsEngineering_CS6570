@@ -184,3 +184,10 @@ x/16xw $esp
 
 
 
+```
+esctf@osboxes:~/sse/assis/a2$ python -c 'print("\xf0B")' | wc -c
+3
+esctf@osboxes:~/sse/assis/a2$ python3 -c 'import sys; sys.stdout.buffer.write(b"\xf0B\n")' | wc -c
+3
+esctf@osboxes:~/sse/assis/a2$ 
+```

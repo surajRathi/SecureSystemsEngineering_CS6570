@@ -14,3 +14,5 @@ print("\xf0" + "B" * (len_buffer - 1))
 print("\x07" + "B" * (len_buffer - 1))
 print("\x05" + "B" * (len_buffer - 1))
 print("\x08" + "B" * (len_buffer - 1) + chr(9) + chr(0) + chr(0) + chr(0))  
+
+
