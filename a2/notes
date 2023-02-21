@@ -1,0 +1,168 @@
+wget 'https://bootstrap.pypa.io/pip/3.5/get-pip.py'
+python3 get-pip.py
+python3 -m pip install filebytes keystone-engine ropper ROPGadget
+
+
+wget 'https://bootstrap.pypa.io/pip/2.7/get-pip.py'
+python get-pip.py
+python -m pip install filebytes keystone-engine ropper ROPGadget
+
+by breaking at fgets, we stored that the first user entry is stored in the symbol plaintext
+
+gef➤  info proc map
+process 2518
+Mapped address spaces:
+
+	Start Addr   End Addr       Size     Offset objfile
+	 0x8048000  0x8049000     0x1000        0x0 /home/esctf/sse/assis/a2/lab_2_rop
+	 0x8049000  0x80b4000    0x6b000     0x1000 /home/esctf/sse/assis/a2/lab_2_rop
+	 0x80b4000  0x80e3000    0x2f000    0x6c000 /home/esctf/sse/assis/a2/lab_2_rop
+	 0x80e3000  0x80e5000     0x2000    0x9a000 /home/esctf/sse/assis/a2/lab_2_rop
+	 0x80e5000  0x80e7000     0x2000    0x9c000 /home/esctf/sse/assis/a2/lab_2_rop
+	 0x80e7000  0x810a000    0x23000        0x0 [heap]
+	0xf7ff9000 0xf7ffc000     0x3000        0x0 [vvar]
+	0xf7ffc000 0xf7ffe000     0x2000        0x0 [vdso]
+	0xfffdd000 0xffffe000    0x21000        0x0 [stack]
+gef➤  
+
+gef➤  x/32xw &plaintext
+0x80e6ce0 <plaintext>:	0x41414141	0x41414141	0x41414141	0x41414141
+0x80e6cf0 <plaintext+16>:	0x41414141	0x41414141	0x41414141	0x41414141
+0x80e6d00 <plaintext+32>:	0x41414141	0x41414141	0x41414141	0x41414141
+0x80e6d10 <plaintext+48>:	0x41414141	0x41414141	0x41414141	0x00000a41
+0x80e6d20 <plaintext+64>:	0x00000000	0x00000000	0x00000000	0x00000000
+0x80e6d30 <plaintext+80>:	0x00000000	0x00000000	0x00000000	0x00000000
+0x80e6d40 <plaintext+96>:	0x00000000	0x00000000	0x00000000	0x00000000
+0x80e6d50 <plaintext+112>:	0x00000000	0x00000000	0x00000000	0x00000000
+gef➤  
+
+
+
+gef➤  info file
+Symbols from "/home/esctf/sse/assis/a2/lab_2_rop".
+Local exec file:
+	`/home/esctf/sse/assis/a2/lab_2_rop', file type elf32-i386.
+	Entry point: 0x8049c20
+	0x08048154 - 0x08048178 is .note.gnu.build-id
+	0x08048178 - 0x08048194 is .note.gnu.property
+	0x08048194 - 0x080481b4 is .note.ABI-tag
+	0x080481b4 - 0x08048224 is .rel.plt
+	0x08049000 - 0x08049024 is .init
+	0x08049030 - 0x08049110 is .plt
+	0x08049110 - 0x080b2bb1 is .text
+	0x080b2bc0 - 0x080b374f is __libc_freeres_fn
+	0x080b3750 - 0x080b3768 is .fini
+	0x080b4000 - 0x080cf3c4 is .rodata
+	0x080cf3c4 - 0x080e2304 is .eh_frame
+	0x080e2304 - 0x080e23db is .gcc_except_table
+	0x080e36a0 - 0x080e36b0 is .tdata
+	0x080e36b0 - 0x080e36d0 is .tbss
+	0x080e36b0 - 0x080e36b8 is .init_array
+	0x080e36b8 - 0x080e36c0 is .fini_array
+	0x080e36c0 - 0x080e4fd4 is .data.rel.ro
+	0x080e4fd4 - 0x080e4ff8 is .got
+	0x080e5000 - 0x080e5044 is .got.plt
+	0x080e5060 - 0x080e5f40 is .data
+	0x080e5f40 - 0x080e5f64 is __libc_subfreeres
+	0x080e5f80 - 0x080e62d4 is __libc_IO_vtables
+	0x080e62d4 - 0x080e62d8 is __libc_atexit
+	0x080e62e0 - 0x080e741c is .bss
+	0x080e741c - 0x080e7430 is __libc_freeres_ptrs
+gef➤ 
+
+plaintext is in the .bss section
+
+
+Notes: int puts(const char *str)
+
+
+
+break *concatenate_first_chars+55 : where fgets is called. 
+break *concatenate_first_chars+108 : where teh next fgets is called
+break *concatenate_first_chars+204: the final printf
+When calling fgets for the first time, "0x80e6ce0" is put on the eax register
+
+char *fgets(char *str, int n, FILE *stream)
+fgets (
+   [sp + 0x0] = 0x080e6ce0 → 0x00000000,
+   [sp + 0x4] = 0x000003e8,
+   [sp + 0x8] = 0x080e5320 → 0xfbad2088
+)
+char *str = 0x080e6ce0 <= aka plaintext, which is stored in the .bss section
+int n = 0x3E8 = 1000
+FILE *stream = 0x080e5320 -> 0xfbad2088 "STDIN?"
+
+
+Second fgets call:
+fgets (
+   [sp + 0x0] = 0xffffcfe0 → 0x00000001,
+   [sp + 0x4] = 0x00000010
+)
+
+0xffffcfe0: Writing to the stack.
+And writing 16 characters to the stack 
+
+gef➤  p $esp
+$5 = (void *) 0xffffcfd0
+gef➤  p $ebp
+$6 = (void *) 0xffffd008
+gef➤  p 0xffffcfe0
+$7 = 0xffffcfe0
+gef➤  
+
+
+
+
+For the printf:
+gef➤  x/s $ebx-0x30fd4
+0x80b402c:	"Here are the first characters from the 10 words concatenated:\n%s\n"
+gef➤  
+
+printf (
+   [sp + 0x0] = 0x080b402c → "Here are the first characters from the 10 words co[...]",
+   [sp + 0x4] = 0xffffcff4 → "abdefghijk",
+   [sp + 0x8] = 0x080e5320 → 0xfbad2288
+)
+
+
+
+- Where is the input data stored
+- Is it, and where is it getting coppied
+- Is it getting overwritten anywhere
+- Canaries?
+- 
+
+
+
+gef➤  info frame
+Stack level 0, frame at 0xffffd010:
+ eip = 0x8049e61 in concatenate_first_chars; saved eip = 0x8049eb7
+ called by frame at 0xffffd030
+ Arglist at 0xffffcfcc, args: 
+ Locals at 0xffffcfcc, Previous frame's sp is 0xffffd010
+ Saved registers:
+  ebx at 0xffffd004, ebp at 0xffffd008, eip at 0xffffd00c
+gef➤  bt
+#0  0x08049e61 in concatenate_first_chars ()
+#1  0x08049eb7 in main ()
+gef➤  x/xw 0xffffd00c
+0xffffd00c:	0x08049eb7
+gef➤ 
+
+Return address stored at: 0xffffd00c
+
+gef➤  p $ebp-0x14
+$12 = (void *) 0xffffcff4
+gef➤  
+
+Output buffer: 0xffffcff4
+
+Need to write 24 bytes then the return address and set i to be 9
+>>> 0xffffd00c-0xffffcff4
+24
+>>> 
+
+
+First: Try to set the value of i to 9
+Then: Overflow the stack to overwrite the return address
+Final: Do the actual ROP stuff.
