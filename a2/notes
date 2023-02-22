@@ -219,3 +219,18 @@ TODO:
 
 
 Can come back to main by setting ebx to the correct value.
+
+
+Registers right before the ret instruciton in concatenate chars (normal
+
+$eax   : 0x49
+$ebx   : 0x080e5000  →  0x00000000
+$ecx   : 0x7fffffb7
+$edx   : 0x080b406d  →  0x61737500
+$esp   : 0xffffd00c  →  0x08049eb7  →  <main+73> sub esp, 0x4
+$ebp   : 0xffffd018  →  0x00000000
+$esi   : 0x080e5000  →  0x00000000
+$edi   : 0x080e5000  →  0x00000000
+$eip   : 0x08049e6d  →  <concatenate_first_chars+216> ret
+$eflags: [carry parity adjust zero SIGN trap INTERRUPT direction overflow resume virtualx86 identification]
+$cs: 0x0023 $ss: 0x002b $ds: 0x002b $es: 0x002b $fs: 0x0000 $gs: 0x0063
