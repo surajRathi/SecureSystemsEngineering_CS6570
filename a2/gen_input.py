@@ -147,9 +147,57 @@ code = [
     sub_eax_edx,
     xlatb,
 
-    # Increment
-    # TODO: the actual cipher
-    inc_eax,
+    # # Increment
+    # # TODO: the actual cipher
+    # inc_eax,
+
+    ####################
+    # Cipher code start:
+    pop_edx_ebx,
+    plaintext,
+    plaintext,
+    pop_eax,
+    counter_addr,
+    mov_eax_peax,
+    sub_eax_edx,
+    pop_ebx,
+    0,
+
+    pop_ecx_clobber_eax,
+    0x080e6ce0,
+
+    # Is the ebx + () a legal value?
+    0x080b0efc,  # add bl, byte ptr [ecx] ; rol byte ptr [ebx + 0x5e5b10c4], 0x5f ; ret
+
+    0x08098880,  # mov eax, ebx ; pop ebx ; ret
+    2 << (4 * 4),  # key in the high byte
+
+    0x0805ebf9,  # pop edx ; pop ebx ; ret
+    (0xFFFFFFFF - ord('A') + 1),  # fill -A+key value in hex
+    2 << (4 * 4),  # fill key value
+
+    add_eax_edx,
+    0x08090b7b,  # idiv bh ; dec dword ptr [edi] ; xchg eax, ebp ; ret
+
+    pop_edx_ebx,
+    ord('A'),  # A value
+    100,
+
+    0x08049c55,  # add ah, dh ; mov ebx, dword ptr [esp] ; ret
+
+    0x080b06f1,  # clc ; mov edi, dword ptr [ebp - 4] ; leave ; ret
+
+    pop_edx_ebx,
+    0x080e6cd4,
+    99,
+
+    0x0808181f,  # test byte ptr [edx], ah ; add eax, dword ptr [eax] ; add bh, dh ; ret
+
+    0x0806b905,  # movzx edx, byte ptr [edx] ; sub eax, edx ; ret
+    0x0805c66e,  # mov eax, edx ; ret
+
+    # Cipher Code End
+    ####################
 
     xchg_eax_edx,
     pop_eax,
@@ -180,7 +228,7 @@ code = [
     # *offset_addr = ecx = offset
     # ebx = offset_addr
     pop_ecx_clobber_eax,
-    0xFFFFFFFF - 75 * 4 + 1,
+    0xFFFFFFFF - (75 + 35) * 4 + 1,
 
     pop_ebx,
     offset_addr,
