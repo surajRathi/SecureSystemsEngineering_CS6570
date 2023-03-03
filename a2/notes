@@ -237,3 +237,13 @@ $cs: 0x0023 $ss: 0x002b $ds: 0x002b $es: 0x002b $fs: 0x0000 $gs: 0x0063
 
 
 Annotation of the assembly, and some "manual disassembly": https://docs.google.com/document/d/17q2QAsoEKqlhMzmKahYQq1D_ahDHasAA-f29_Ji8uJs/edit
+
+Ceaser Cipher:
+for(int i = 0; i < len(text); i ++)
+    text[i] = (text[i] - 'A' + key) % 26 + 'A'
+
+Steps:
+  1. Store the key in memory or a register
+  2. Figure out how to iterate through the string; how to stop at the end
+  3. How to increment and mod
+  4. Return to main (done)
