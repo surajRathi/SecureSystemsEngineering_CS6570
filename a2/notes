@@ -371,3 +371,14 @@ Go to startsudo p
 
 0x0806c646: xlatb; ret;
 Set AL to memory byte DS:[(E)BX + unsigned AL].
+
+
+
+$eax   : 0xffffd030  →  0x00000001
+# $ebx   : 0x080e5000  →  0x00000000
+$ecx   : 0xffffd030  →  0x00000001
+# $edx   : 0xffffd080  →  0x080e5000  →  0x00000000
+~~~~$esp   : 0xffffd00c  →  0x08049eb7  →  <main+73> sub esp, 0x4
+# $ebp   : 0xffffd018  →  0x00000000
+$esi   : 0x080e5000  →  0x00000000
+$edi   : 0x080e5000  →  0x00000000
