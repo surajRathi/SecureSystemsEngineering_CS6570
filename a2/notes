@@ -247,3 +247,127 @@ Steps:
   2. Figure out how to iterate through the string; how to stop at the end
   3. How to increment and mod
   4. Return to main (done)
+
+Useful instructions
+0x080b0439: inc eax; dec eax; ret;
+0x080b04a9: inc eax; dec esp; ret;
+
+0x08075000: inc eax; pop ebp; pop ebx; pop esi; pop edi; ret;
+
+0x08069d76: inc edx; pop es; sub eax, ecx; ret;
+
+0x08088a9e: inc eax; ret;
+0x0807751a: inc ebx; ret;
+0x0807c165: inc ecx; ret;
+0x08066194: inc edx; ret;
+
+0x08070b64: add eax, ecx; ret;
+0x08071393: add eax, edx; ret;
+0x08049d37: add ecx, ecx; ret;
+
+0x080a36c8: mov dword ptr [eax], edx; ret;
+0x0805f932: mov dword ptr [edx], eax; ret;
+0x0805fc44: mov eax, dword ptr [eax]; ret;
+0x08098db0: mov eax, ecx; ret;
+0x0805c66e: mov eax, edx; ret;
+
+
+0x08065fe6: pop edx; pop ebx; pop esi; ret;
+0x0805ebf9: pop edx; pop ebx; ret;
+0x080ad381: pop edx; push cs; or bh, al; ret;
+0x08070de5: pop edx; xor eax, eax; pop edi; ret;
+
+
+Rough:
+
+# ecx or edx is the counter
+
+# Initialize ecx to
+0x0804fc70: xor eax, eax; ret;
+0x08098db8: mov ecx, eax; mov eax, ecx; ret;
+
+0x08098db0: mov eax, ecx; ret;
+0x0805c66e: mov eax, edx; ret;
+
+0x0807c165: inc ecx; ret;
+0x08066194: inc edx; ret;
+
+0x0805fc44: mov eax, dword ptr [eax]; ret;
+
+
+Rough 2:
+
+# ecx is the counter
+
+# Initialize ecx to the start address
+0x0805ebf9: pop edx; pop ebx; ret;
+
+start:
+# Load the value into eax
+0x0805c66e: mov eax, edx; ret;
+0x0805fc44: mov eax, dword ptr [eax]; ret;
+
+# check for \0
+Break then.
+
+# Do the operation
+
+# Write the value
+
+#
+# Increment ecx
+0x08066194: inc edx; ret;
+
+Go to startsudo p
+
+
+
+
+0x0805f980 : sub eax, edx ; ret
+0x08088b2e : sub bh, al ; ret
+0x080577ea : sub byte ptr [eax], al ; or byte ptr [eax], al ; add bl, ch ; ret
+0x08070e25 : cmp byte ptr [eax], ah ; pop edi ; ret
+0x08070e15 : cmp byte ptr [eax], dl ; pop edi ; ret
+0x08070df5 : cmp al, dh ; pop edi ; ret
+0x0808ce95 : inc dword ptr [ecx] ; ret
+0x08088a9e : inc eax ; ret
+0x08066194 : inc edx ; ret
+0x0807751a : inc ebx ; ret
+0x0807c165 : inc ecx ; ret
+0x08063823 : add al, 0 ; add byte ptr [ecx], bh ; ret
+0x080b20bf : nop ; pop ebx ; ret
+0x080640c1 : pop ecx ; add al, 0xf6 ; ret
+0x080707e4 : sub byte ptr [ecx], al ; add byte ptr [eax], al ; lea eax, [edi + 7] ; pop edi ; ret
+0x0805f97d : mov eax, dword ptr [ecx + 8] ; sub eax, edx ; ret
+0x0806dac2 : mov byte ptr [edx], al ; mov eax, edx ; ret
+0x08090b7b : idiv bh ; dec dword ptr [edi] ; xchg ebp, eax ; ret
+0x0806dac0 : mov al, byte ptr [ecx] ; mov byte ptr [edx], al ; mov eax, edx ; ret
+0x080640c1 : pop ecx ; add al, 0xf6 ; ret
+0x0805ebf9 : pop edx ; pop ebx ; ret
+0x0806dac2 : mov byte ptr [edx], al ; mov eax, edx ; ret
+0x0805bfe5 : sub byte ptr [ebx - 0x76d3db94], cl ; ret
+0x080670ce : add byte ptr [ebx - 0x39], dl ; ret
+0x08098db0 : mov eax, ecx ; ret
+0x08074696 : xchg edx, eax ; ret
+0x080750c1 : mov byte ptr [edi], ah ; mov eax, dword ptr [esp + 0x10] ; pop ebx ; pop esi ; pop edi ; ret
+0x08082d28 : xchg edi, eax ; ret
+0x080a0f5b : push dword ptr [ecx] ; shr cl, cl ; ret
+0x0804af53 : xchg dword ptr [esi], eax ; add byte ptr [ebx + 0x5e5b04c4], al ; ret
+0x08074e13 : mov esi, edx ; ret
+0x08071836 : and ch, 0 ; add byte ptr [eax], al ; lea eax, [eax + 0xb] ; pop edi ; ret
+0x080b04ea : push eax ; ret
+0x08062abe : xchg ebp, eax ; ret
+0x08075307 : mov byte ptr [edi], ah ; mov eax, edi ; pop ebx ; pop esi ; pop edi ; ret
+0x08049c55 : add ah, dh ; mov ebx, dword ptr [esp] ; ret
+0x0809898a : mov eax, esi ; pop ebx ; pop esi ; ret
+
+
+0x080a2988 : clc ; mov edx, ebp ; pop ebx ; pop esi ; pop edi ; pop ebp ; ret
+0x0804b3e1 : clc ; pop ebx ; pop esi ; pop edi ; pop ebp ; ret
+0x080509a1 : clc ; pop ebx ; pop esi ; pop edi ; ret
+0x0806a16f : clc ; pop edi ; ret
+
+
+
+0x0806c646: xlatb; ret;
+Set AL to memory byte DS:[(E)BX + unsigned AL].
