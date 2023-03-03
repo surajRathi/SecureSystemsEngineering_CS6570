@@ -234,3 +234,6 @@ $edi   : 0x080e5000  →  0x00000000
 $eip   : 0x08049e6d  →  <concatenate_first_chars+216> ret
 $eflags: [carry parity adjust zero SIGN trap INTERRUPT direction overflow resume virtualx86 identification]
 $cs: 0x0023 $ss: 0x002b $ds: 0x002b $es: 0x002b $fs: 0x0000 $gs: 0x0063
+
+
+Annotation of the assembly, and some "manual disassembly": https://docs.google.com/document/d/17q2QAsoEKqlhMzmKahYQq1D_ahDHasAA-f29_Ji8uJs/edit
