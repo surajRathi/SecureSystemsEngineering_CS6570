@@ -61,12 +61,14 @@ def main():
         if password is None:
             break
 
-        if not isinstance(password, str):
+        if not isinstance(password, str) and not isinstance(password, bytes):
             print(f"{red}Your input was of type {reset}{type(password)}")
             print(f"{red}Your input was: {reset}{password}")
             print()
             continue
 
+        if isinstance(password, str):
+            password = password.encode("ASCII")
         try:
             res = connect(password=password)
         except ConnectionResetError:
