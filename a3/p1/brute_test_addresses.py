@@ -16,7 +16,7 @@ def process(i):
 
 
 def main():
-    r = process_map(process, tqdm.trange(0, 0xFFFFFFFF + 1, 4), max_workers=16, chunksize=128)
+    r = process_map(process, tqdm.trange(0xbfffffff, 0xbf000000, -4), max_workers=16, chunksize=16)
 
 
 if __name__ == '__main__':
