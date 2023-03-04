@@ -35,6 +35,7 @@ move_bp_edx_al_clobber_eax = 0x0806dac2  # mov byte ptr [edx], al; mov eax, edx;
 add_eax_edx = 0x08071393  # add eax, edx ; ret
 nop = 0x08049caf  # nop; ret;
 
+key = 2
 break_char = ord('\n')
 stdout.write("ABCDEFGH\n")  # To be read into `plaintext`
 
@@ -149,7 +150,18 @@ code = [
 
     # Increment
     # TODO: the actual cipher
-    inc_eax,
+    # 1. Value += (-'A' + key)
+    # 2. Value %= 26
+    # 3. Value += 'A'
+
+    pop_edx_ebx,
+    (0xFFFFFFFF - 'A' + key + 1),
+    plaintext,
+
+    add_eax_edx,
+
+    # TODO: Finins
+    # End Cipher part
 
     xchg_eax_edx,
     pop_eax,
