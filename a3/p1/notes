@@ -141,3 +141,19 @@ because it is the memory address with which we overwrite the return address.'
 
 What we can do is try to print the stack with minimum smashing to get the contents of the stack. (Assuming it stays the
 same between iterations)
+
+Possibly interesting parts of the stack:
+
+```
+suraj@amd-rathi ~/Documents/acads/sse/assis/a3/p1 (git)-[master] % ./stack_dump.py
+   2:  00000025  \x00\x00\x00%
+   5:  00000000  \x00\x00\x00\x00
+   6:  0000001e  \x00\x00\x00\x1e
+   8:  73696874  siht
+   9:  64726f77  drow
+  10:  64656b61  deka
+  11:  63617473  cats
+  12:  74736574  tset
+  13:  00000000  \x00\x00\x00\x00
+  14:  00000000  \x00\x00\x00\x00
+```

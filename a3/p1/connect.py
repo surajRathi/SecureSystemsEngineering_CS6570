@@ -6,7 +6,7 @@ server_port = 1023
 
 
 # Note should the input arguments be bytes?
-def connect(username: bytes = b"test", password: bytes = b"test") -> bytes:
+def connect(username: bytes = b"test", password: bytes = b"test", raw=False) -> bytes:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((server_ip, server_port))
         s.send(username)
@@ -17,6 +17,9 @@ def connect(username: bytes = b"test", password: bytes = b"test") -> bytes:
         f = s.makefile('rb')
         for i in range(3):
             line = f.readline()
+
+        if raw:
+            return line
 
         line = line[line.find(b'?') + 2:]
         line = line[:line.find(b" is not the correct password.")]
