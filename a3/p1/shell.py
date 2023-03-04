@@ -28,10 +28,7 @@ def hist_setup():
 def readable_decode(inp: bytes) -> str:
     out = ''
     for byte in inp:
-        if (byte == ord(' ')) or \
-                (ord('0') <= byte <= ord('9')) or \
-                (ord('A') <= byte <= ord('Z')) or \
-                (ord('a') <= byte <= ord('z')):
+        if 32 <= byte <= 125:
             out += chr(byte)
         else:
             out += f"\\x{byte:02x}"
