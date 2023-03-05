@@ -302,7 +302,7 @@ password = b"ABCDEFGHIJKL" + b"_%26$X_%27$X_%28$X"
 ABCDEFGHIJKL_44434241_4C4B4A49_255F5824
 ```
 
-The machine is of 64 bit architecture, thus we need to use %p with 16 lenght padding:
+The machine is of 64 bit architecture, thus we need to use %p with 16 length padding:
 
 ```
    2:  0000000000000025  %\x00\x00\x00\x00\x00\x00\x00
