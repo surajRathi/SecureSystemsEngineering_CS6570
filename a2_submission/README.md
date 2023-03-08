@@ -11,6 +11,7 @@ Exploit generator: [part_a.py](part_a.py)
 
 ```bash
 ./part_a.py | ./lab_2_rop
+
 ```
 
 ![esctf@osboxes:~/sse/assis/sub2$ ./part_a.py | ./lab_2_rop
@@ -21,26 +22,13 @@ Value in glb is 720
 Segmentation fault](img/part_a.png)
 
 ## Part B:
-
-### Increment each letter by 1
-Exploit generator: [part_b_loop.py](part_b_loop.py)  
-
-Loops through the plaintext until a '\n' is reached.
-Each byte is loaded, incremented, and stored again.
+Exploit generator: [part_b_caesar.py](part_b.py)  
 
 ```bash
-./part_b_loop.py "ThisIsTheSecret"| ./lab_2_rop
+./part_b_caesar.py 25 'ABCDEFGHIJKLMNOP' | ./lab_2_rop
 ```
 
-![Output](img/part_b_loop.png)
+![img.png](img/part_b.png)
 
-### Caesar Cipher Attempt
-Exploit generator: [part_b_caesar.py](part_b_caesar.py)  
-
-We were unable to make the loop work with the cipher shell code instead of the increment instruction.
-
-```bash
-./part_b_caesar.py 12 "ThisIsTheSecret"| ./lab_2_rop
-```
-
-![Output](img/part_b_ceasar.png)
+## Reason for Late submission
+Before the deadline, we were only aboe 
