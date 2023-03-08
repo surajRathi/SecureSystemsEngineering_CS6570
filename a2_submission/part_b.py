@@ -124,7 +124,7 @@ code = [
     0x0,
 
     # Write initial pointer location
-    # *counter_addr = 0
+    # *counter_addr = plaintext
     pop_ecx_clobber_eax,
     plaintext,
     pop_ebx,
@@ -143,11 +143,11 @@ code = [
     0,
     0x0,
 
+    # nops for padding the "jumps".
     nop,
     nop,
     nop,
     nop,
-
     nop,
     nop,
     nop,
@@ -167,7 +167,6 @@ code = [
     # Load the '\n'
 
     # eax = (byte) **counter_addr
-    # TODO: change to using counter_addr
     # Load Element
     pop_edx_ebx,
     plaintext,
@@ -183,7 +182,7 @@ code = [
     # edx = char to bk + 1
     xchg_eax_edx,
     pop_eax,
-    break_char + 1,  # TODO: should be \n + 1
+    break_char + 1,
     xchg_eax_edx,
 
     # ecx = 1 if **counter_addr <= char to bk
@@ -191,7 +190,6 @@ code = [
     load_cl_CF,
 
     # ecx *= number of instructions to skip in the set `code`
-    # TODO: Tune the next set to the number of instructions left in the `code` list after the_esp_op
     double_ecx,
     double_ecx,
     double_ecx,
@@ -235,10 +233,6 @@ code = [
     sub_eax_edx,
     xlatb,
 
-    # # Increment
-    # # TODO: the actual cipher
-    # inc_eax,
-
     ####################
     # Cipher code start:
 
@@ -274,7 +268,6 @@ code = [
     # edx = plaintext + counter_variable
     move_bp_edx_al_clobber_eax,
 
-    # TODO: *counter_addr++
     pop_eax,
     counter_addr,
     mov_eax_peax,
@@ -287,8 +280,6 @@ code = [
     offset_addr,
     0x0,
     nop,
-
-    # TODO: Set the offset of the top of the loop, and go there
 
     # *offset_addr = ecx = offset
     # ebx = offset_addr
@@ -308,6 +299,7 @@ code = [
     # esp += [ebx + 4 * eax] => esp += *offset_addr
     the_esp_op,
 
+    # nops for padding the "jumps".
     nop,
     nop,
     nop,
