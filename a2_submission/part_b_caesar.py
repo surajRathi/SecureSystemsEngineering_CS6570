@@ -29,6 +29,7 @@ pop_ebp = 0x08049859  # pop ebp; ret;
 plaintext = 0x80e6ce0  # Address
 counter_addr = plaintext - 4
 offset_addr = plaintext - 8
+filled_mask_addr = plaintext - 12
 format_str = 0x80b40a4  # Address
 xlatb = 0x0806c646  # xlatb; ret;  # mov al, BYTE PTR [ebx + al]
 inc_eax = 0x08088a9e  # inc eax; ret;
@@ -70,6 +71,15 @@ code = [
     plaintext,
     pop_ebx,
     counter_addr,
+    fancy_dw_ebx_ecx,
+    0x0,
+    0,
+    0x0,
+
+    pop_ecx_clobber_eax,
+    0xFFFFFFFF,
+    pop_ebx,
+    filled_mask_addr,
     fancy_dw_ebx_ecx,
     0x0,
     0,
@@ -173,48 +183,25 @@ code = [
 
     ####################
     # Cipher code start:
-    pop_edx_ebx,
-    plaintext,
-    plaintext,
-    pop_eax,
-    counter_addr,
-    mov_eax_peax,
-    sub_eax_edx,
-    pop_ebx,
-    0,
-
-    pop_ecx_clobber_eax,
-    0x080e6ce0,
-
-    # Is the ebx + () a legal value?
-    0x080b0efc,  # add bl, byte ptr [ecx] ; rol byte ptr [ebx + 0x5e5b10c4], 0x5f ; ret
-
-    0x08098880,  # mov eax, ebx ; pop ebx ; ret
-    key << (4 * 4),  # key in the high byte
 
     0x0805ebf9,  # pop edx ; pop ebx ; ret
-    (0xFFFFFFFF - ord('A') + 1),  # fill -A+key value in hex
-    key << (4 * 4),  # fill key value
+    (0xFFFFFFFF - ord('A') + 1) + key,  # edx <- -A + key (two's complement)
+    26 << 8,  # bh <- 26
 
-    add_eax_edx,
-    0x08090b7b,  # idiv bh ; dec dword ptr [edi] ; xchg eax, ebp ; ret
+    0x08071393,  # add eax, edx ; ret
 
-    pop_edx_ebx,
-    ord('A'),  # A value
-    100,
+    0x08090b7b,  # idiv bh ; dec dword ptr [edi] ; xchg ebp, eax ; ret
+
+    0x08062abe,  # xchg ebp, eax ; ret
+
+    0x0805ebf9,  # pop edx ; pop ebx ; ret
+    ord('A') << 8,  # A in dh
+    filled_mask_addr,
 
     0x08049c55,  # add ah, dh ; mov ebx, dword ptr [esp] ; ret
-
-    0x080b06f1,  # clc ; mov edi, dword ptr [ebp - 4] ; leave ; ret
-
-    pop_edx_ebx,
-    0x080e6cd4,
-    99,
-
-    0x0808181f,  # test byte ptr [edx], ah ; add eax, dword ptr [eax] ; add bh, dh ; ret
-
-    0x0806b905,  # movzx edx, byte ptr [edx] ; sub eax, edx ; ret
-    0x0805c66e,  # mov eax, edx ; ret
+    0x08074696,  # xchg edx, eax ; ret
+    0x0804fc70,  # xor eax, eax ; ret
+    0x08071385,  # adc al, dh ; ret
 
     # Cipher Code End
     ####################
@@ -248,7 +235,7 @@ code = [
     # *offset_addr = ecx = offset
     # ebx = offset_addr
     pop_ecx_clobber_eax,
-    0xFFFFFFFF - (75 + 35) * 4 + 1,
+    0xFFFFFFFF - (75 + 13) * 4 + 1,
 
     pop_ebx,
     offset_addr,
