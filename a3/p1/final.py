@@ -53,7 +53,7 @@ def main():
         if len(u) == 1:
             v = tuple(u)[0]
             str_bytes = (v[:2], v[2:4], v[4:6], v[6:8], v[8:10], v[10:12], v[12:14], v[14:16])[::-1]
-            if v[:8] == "0000000000000000":
+            if v[:16] == "0000000000000000":
                 continue
             byte_bytes = [int(s, 16) for s in str_bytes]
             tqdm.tqdm.write(f"{i:4}:  {v}  {readable_decode(byte_bytes)}")
