@@ -16,11 +16,11 @@ void adduser()
 	char lvl[2];
 
 	printf("Enter user name\n");
-	gets(p);
+	gets(p); // No length checking --> Can rewrite things in the heap?
 
 	printf("Enter user privilege level from 1 (highest) to 4 (lowest)\n");
 
-	gets(lvl);
+	gets(lvl);  // No length checking -> Buffer overflow?
 	lvli = atoi(lvl);
 
 	while(i != SIZE){
@@ -56,12 +56,12 @@ void removeuser()
 	printf("Enter user number to remove : ");
 	gets(&n);
 	ni = atoi(n)-1;
-	if (ni >= SIZE){
+	if (ni >= SIZE){  // ni can be negative
 		printf("Invalid number\n");
 		return;	
 	}
 
-	free(users[ni].name);
+	free(users[ni].name);  // Free
 	users[ni].lvl = 0;
 }
 
