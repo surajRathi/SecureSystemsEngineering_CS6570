@@ -1,0 +1,45 @@
+Possible exploits:
+
+1. `adduser`: Gets is used to read the name string (set to 16 bytes on the heap) and the lvl string (can be used to overflow the stack.
+2. `adduser`: p is not free'd if the userlist is full.
+3. `removeuser`: `ni` used for USERS array indexing can be set to negative.
+4. `removeuser`: The function does not check if the user actually exists. It can be used to free a pointer repeatedly.
+
+Running in gdb:
+- Secret: 0x492888
+
+
+Approach:
+- Use vuln 1 on lvl to set the address of p to the address of secret
+- Delete the user and create one again, this will allow us to write to secret. (I believe the same malloc buffer will be used again)
+- Exit the program to print the modified secret.
+
+
+Exploit str:
+echo "a\nsuraj\n1a\x88\x28\x49\np\n" > a
+
+break *adduser+73; break *adduser+102
+
+
+Address of the pointer:
+0x00007fffffffddc8: 0x00000000006c0f50 -> 0x0000006a61727573
+es
+They are using some weird register based calling convention.
+
+break *adduser+63
+break *adduser+92
+break *adduser+102
+break *adduser+
+
+Addr of secr: 0x0000000000492888
+
+Address of p: 0x00007fffffffddc8
+Start of lvl: 0x00007fffffffddd6
+Sentinel    : 0x00007fffffffddd8
+Ret addr on : 0x00007fffffffdde8
+
+
+The order is different from the binary. Hence, we cannot overflow lvl to write an address to p.
+
+
+The only method left is to overflow the name field to do something to the heap.
