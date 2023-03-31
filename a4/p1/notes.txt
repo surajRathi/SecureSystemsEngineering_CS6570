@@ -43,3 +43,61 @@ The order is different from the binary. Hence, we cannot overflow lvl to write a
 
 
 The only method left is to overflow the name field to do something to the heap.
+
+
+
+break *main+71
+r
+a
+AAAABBBBCCCCDDDD
+1
+
+gef➤  info proc map
+process 2435
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset objfile
+            0x400000           0x4b7000    0xb7000        0x0 /home/esctf/sse/assis/a4/p1/users
+            0x6b7000           0x6bd000     0x6000    0xb7000 /home/esctf/sse/assis/a4/p1/users
+            0x6bd000           0x6e1000    0x24000        0x0 [heap]
+      0x7ffff7ffa000     0x7ffff7ffd000     0x3000        0x0 [vvar]
+      0x7ffff7ffd000     0x7ffff7fff000     0x2000        0x0 [vdso]
+      0x7ffffffde000     0x7ffffffff000    0x21000        0x0 [stack]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0 [vsyscall]
+gef➤  find 0x6bd000, 0x6e1000, "AAAABBBBCCCCDDDD"
+0x6c0350
+warning: Unable to access 6304 bytes of target memory at 0x6df761, halting search.
+1 pattern found.
+gef➤  heap chunk 0x6c0350
+Chunk(addr=0x6c0350, size=0x20, flags=PREV_INUSE)
+Chunk size: 32 (0x20)
+Usable size: 24 (0x18)
+Previous chunk size: 0 (0x0)
+PREV_INUSE flag: On
+IS_MMAPPED flag: Off
+NON_MAIN_ARENA flag: Off
+
+gef➤  x/6xg 0x6c0340
+0x6c0340:	0x0000000000000000	0x0000000000000021
+0x6c0350:	0x4242424241414141	0x4444444443434343
+0x6c0360:	0x0000000000000000	0x0000000000020ca1
+gef➤
+
+gef➤  find 0x6bd000, 0x6e1000, "WWWWXXXXYYYYZZZZ"
+0x6c0370
+warning: Unable to access 6272 bytes of target memory at 0x6df781, halting search.
+1 pattern found.
+gef➤  heap chunk 0x6c0370
+Chunk(addr=0x6c0370, size=0x20, flags=PREV_INUSE)
+Chunk size: 32 (0x20)
+Usable size: 24 (0x18)
+Previous chunk size: 0 (0x0)
+PREV_INUSE flag: On
+IS_MMAPPED flag: Off
+NON_MAIN_ARENA flag: Off
+
+gef➤  x/6xg 0x6c0360
+0x6c0360:	0x0000000000000000	0x0000000000000021
+0x6c0370:	0x5858585857575757	0x5a5a5a5a59595959
+0x6c0380:	0x0000000000000000	0x0000000000020c81
+gef➤
