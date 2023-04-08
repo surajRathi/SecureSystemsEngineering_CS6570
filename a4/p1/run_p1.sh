@@ -13,3 +13,5 @@ if [ "$flag" -eq 1 ]; then
 else
   echo "Failed to find the address, maybe increase the address range"
 fi
+
+echo $i
