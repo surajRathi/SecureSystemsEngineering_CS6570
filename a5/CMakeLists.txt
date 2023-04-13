@@ -15,4 +15,4 @@ target_link_libraries(double_hash OpenSSL::SSL)
 
 add_executable(hash_executer hash_executer.c)
 find_package(OpenSSL REQUIRED)
-target_link_libraries(double_hash OpenSSL::SSL)
+target_link_libraries(hash_executer OpenSSL::SSL)
