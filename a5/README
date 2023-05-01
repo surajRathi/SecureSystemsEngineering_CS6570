@@ -1,0 +1,6 @@
+We take the password and hash it twice.
+
+From the first hash we calculate an offset for our function table.
+This hash doesn't need to be cryptographically secure.
+
+The second hash is used to verify the password's correctness. This hash must be cryptographically secure.

@@ -88,7 +88,7 @@ int main() {
                 printf("you do not have the required access\n");
             }
         case 'A':
-            run_func(&add);
+            run_func(&sum);
             break;
         default:
             printf("Invalid Input.\n");

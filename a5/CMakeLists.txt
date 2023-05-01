@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
-project(a5 C)
+project(a5 C CXX)
 
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
 
 #set(OPENSSL_USE_STATIC_LIBS TRUE)
 find_package(OpenSSL REQUIRED)
@@ -17,3 +18,8 @@ target_link_libraries(double_hash OpenSSL::SSL)
 
 add_executable(hash_executer hash_executer.c)
 target_link_libraries(hash_executer OpenSSL::SSL)
+
+add_executable(start_changer hash_executer.c)
+target_link_libraries(hash_executer OpenSSL::SSL)
+
+add_executable(func_66 func_66.cc)
